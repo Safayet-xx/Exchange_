@@ -79,6 +79,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "exchange.wsgi.application"
 
 # Database
+# Database
 # Supports both PostgreSQL (Docker) and SQLite (Development)
 import dj_database_url
 
@@ -97,7 +98,6 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
-
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
