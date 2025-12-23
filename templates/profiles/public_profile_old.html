@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}{{ profile.display_name|default:profile.user.email }} - Profile{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Profile Card -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto; color: white; font-size: 3rem;">
+                            {{ profile.display_name.0|upper|default:'?' }}
+                        </div>
+                    </div>
+                    <h3>{{ profile.display_name|default:profile.full_name|default:profile.user.email }}</h3>
+                    <p class="text-muted">@{{ profile.handle }}</p>
+                    <span class="badge {% if profile.role == 'professor' %}bg-primary{% else %}bg-success{% endif %} mb-3">
+                        {{ profile.get_role_display }}
+                    </span>
+                    
+                    {% if profile.average_rating %}
+                        <div class="mb-2">
+                            <strong>⭐ {{ profile.average_rating }}/5</strong>
+                            <small class="text-muted">({{ profile.rating_count }} reviews)</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">📞 Contact Information</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>Email:</strong><br>
+                        <a href="mailto:{{ profile.user.email }}">{{ profile.user.email }}</a>
+                    </p>
+                    <p class="mb-2">
+                        <strong>University:</strong><br>
+                        {{ profile.university|default:'Not specified' }}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Joined:</strong><br>
+                        {{ profile.joined_date|date:"F Y"|default:"Recently" }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Stats Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📊 Stats</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>Skills:</strong> {{ profile.user.user_skills.count }}
+                    </p>
+                    <p class="mb-2">
+                        <strong>Sessions Helped:</strong> {{ profile.total_sessions_helped|default:0 }}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Credits Earned:</strong> {{ profile.total_credits_earned|default:0 }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-8">
+            <!-- About Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">👤 About Me</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ profile.bio|default:'No bio provided yet.' }}</p>
+                </div>
+            </div>
+
+            <!-- Personal Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">ℹ️ Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <strong>Full Name:</strong><br>
+                            {{ profile.full_name|default:'Not specified' }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Hobbies:</strong><br>
+                            {{ profile.hobbies|default:'Not specified' }}
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <strong>Fun Fact:</strong><br>
+                            {{ profile.fun_fact|default:'Not specified' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skills Section -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">🎯 Skills & Expertise</h5>
+                </div>
+                <div class="card-body">
+                    {% if profile.user.user_skills.all %}
+                        <div class="row">
+                            {% for user_skill in profile.user.user_skills.all %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="border rounded p-3">
+                                        <h6>{{ user_skill.skill.name }}</h6>
+                                        <p class="mb-1">
+                                            <span class="badge bg-primary">{{ user_skill.get_proficiency_level_display }}</span>
+                                            <span class="badge bg-info">{{ user_skill.years_of_experience }} years</span>
+                                        </p>
+                                        {% if user_skill.description %}
+                                            <small class="text-muted">{{ user_skill.description|truncatewords:15 }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No skills added yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            {% if user.is_authenticated and user != profile.user %}
+                <div class="card">
+                    <div class="card-body">
+                        <a href="{% url 'exchanges:create' %}?helper={{ profile.user.email }}" class="btn btn-primary">
+                            💼 Request Session
+                        </a>
+                        <a href="{% url 'posts:list' %}" class="btn btn-outline-secondary">
+                            View Posts
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-radius: 12px;
+    }
+    .card-header {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-bottom: 2px solid #e1e8ed;
+    }
+</style>
+{% endblock %}
