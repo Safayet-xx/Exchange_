@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Search Users{% endblock %}
+{% block content %}
+  <h1>Search Users</h1>
+  <form method="get">
+    <input type="text" name="q" value="{{ q|default_if_none:'' }}" placeholder="Search by handle or name">
+    <button type="submit">Search</button>
+  </form>
+
+  {% if q %}
+    <h3>Results for "{{ q }}"</h3>
+    <ul>
+      {% for p in results %}
+        <li>
+          <a href="{% url 'profiles:public_profile' p.handle %}">
+            {{ p.full_name|default:p.display_name|default:p.handle }}
+          </a>
+        </li>
+      {% empty %}
+        <li>No results</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endblock %}

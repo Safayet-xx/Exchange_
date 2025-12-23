@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Complete Profile | Exchange{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">👤 Complete Your Profile</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">Please fill in all required fields to complete your profile.</p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form %}
+                            <!-- Display Name -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.display_name.label }} <span class="text-danger">*</span></label>
+                                {{ form.display_name }}
+                                {% if form.display_name.errors %}
+                                    <div class="text-danger">{{ form.display_name.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Handle -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.handle.label }} <span class="text-danger">*</span></label>
+                                {{ form.handle }}
+                                <small class="form-text text-muted">{{ form.handle.help_text }}</small>
+                                {% if form.handle.errors %}
+                                    <div class="text-danger">{{ form.handle.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Full Name -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.full_name.label }}</label>
+                                {{ form.full_name }}
+                                {% if form.full_name.errors %}
+                                    <div class="text-danger">{{ form.full_name.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Role -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.role.label }} <span class="text-danger">*</span></label>
+                                {{ form.role }}
+                                <small class="form-text text-muted">{{ form.role.help_text }}</small>
+                                {% if form.role.errors %}
+                                    <div class="text-danger">{{ form.role.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <hr>
+                            <h5 class="mb-3">Additional Information</h5>
+
+                            <!-- Bio -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.bio.label }} <span class="text-danger">*</span></label>
+                                {{ form.bio }}
+                                {% if form.bio.errors %}
+                                    <div class="text-danger">{{ form.bio.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- University -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.university.label }} <span class="text-danger">*</span></label>
+                                {{ form.university }}
+                                {% if form.university.errors %}
+                                    <div class="text-danger">{{ form.university.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Phone Number -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.phone_number.label }}</label>
+                                {{ form.phone_number }}
+                                <small class="form-text text-muted">{{ form.phone_number.help_text }}</small>
+                                {% if form.phone_number.errors %}
+                                    <div class="text-danger">{{ form.phone_number.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Date of Birth -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.date_of_birth.label }} <span class="text-danger">*</span></label>
+                                {{ form.date_of_birth }}
+                                {% if form.date_of_birth.errors %}
+                                    <div class="text-danger">{{ form.date_of_birth.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Hobbies -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.hobbies.label }} <span class="text-danger">*</span></label>
+                                {{ form.hobbies }}
+                                {% if form.hobbies.errors %}
+                                    <div class="text-danger">{{ form.hobbies.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Fun Fact -->
+                            <div class="mb-3">
+                                <label class="form-label">{{ form.fun_fact.label }} <span class="text-danger">*</span></label>
+                                {{ form.fun_fact }}
+                                {% if form.fun_fact.errors %}
+                                    <div class="text-danger">{{ form.fun_fact.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg w-100">Save Profile</button>
+                        {% else %}
+                            <p class="text-danger">Form not available. Please contact support.</p>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
