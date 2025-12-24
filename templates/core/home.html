@@ -1,0 +1,344 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Exchange Platform{% endblock %}
+
+{% block content %}
+
+{% if user.is_authenticated %}
+<!-- Authenticated User Home -->
+
+<!-- Hero Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <div class="card-body py-5 text-center">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="bi bi-mortarboard-fill"></i> Welcome back, {{ user.profile.display_name|default:"Student" }}!
+                </h1>
+                <p class="lead mb-4">Share your skills, learn from others, and grow together</p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{% url 'posts:list' %}" class="btn btn-light btn-lg">
+                        <i class="bi bi-grid-3x3-gap-fill"></i> Browse Marketplace
+                    </a>
+                    <a href="{% url 'core:search' %}" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-search"></i> Search Platform
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <i class="bi bi-wallet2"></i>
+            <h3>{{ user.wallet.balance }}</h3>
+            <p>Credits</p>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <i class="bi bi-award-fill"></i>
+            <h3>{{ user.user_skills.count }}</h3>
+            <p>Skills</p>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <i class="bi bi-grid-3x3-gap-fill"></i>
+            <h3>{{ user.posts.count }}</h3>
+            <p>Posts</p>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card">
+            <i class="bi bi-calendar-check-fill"></i>
+            <h3>{{ sessions_count|default:0 }}</h3>
+            <p>Sessions</p>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="bi bi-lightning-fill text-warning"></i> Quick Actions
+        </h2>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <i class="bi bi-plus-circle-fill" style="font-size: 3rem; color: #667eea;"></i>
+                <h5 class="card-title mt-3">Create Post</h5>
+                <p class="card-text small text-muted">Share what you can offer or what you need</p>
+                <a href="{% url 'posts:create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> Create
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <i class="bi bi-award-fill" style="font-size: 3rem; color: #f093fb;"></i>
+                <h5 class="card-title mt-3">Add Skills</h5>
+                <p class="card-text small text-muted">Showcase your expertise and knowledge</p>
+                <a href="{% url 'skills:add' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> Add Skill
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <i class="bi bi-search" style="font-size: 3rem; color: #4facfe;"></i>
+                <h5 class="card-title mt-3">Search</h5>
+                <p class="card-text small text-muted">Find users or skills across departments</p>
+                <a href="{% url 'core:search' %}" class="btn btn-primary">
+                    <i class="bi bi-search"></i> Search
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card h-100 text-center">
+            <div class="card-body">
+                <i class="bi bi-wallet2" style="font-size: 3rem; color: #00f2fe;"></i>
+                <h5 class="card-title mt-3">Send Credits</h5>
+                <p class="card-text small text-muted">Transfer credits to other users</p>
+                <a href="{% url 'credits:transfer' %}" class="btn btn-primary">
+                    <i class="bi bi-send-fill"></i> Transfer
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Posts -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="bi bi-grid-3x3-gap-fill text-primary"></i> Recent Posts
+            </h2>
+            <a href="{% url 'posts:list' %}" class="btn btn-outline-primary">
+                View All <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+    
+    {% if recent_posts %}
+        {% for post in recent_posts %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge {% if post.post_type == 'offer' %}bg-success{% else %}bg-primary{% endif %}">
+                            {% if post.post_type == 'offer' %}
+                                <i class="bi bi-gift-fill"></i> Offering
+                            {% else %}
+                                <i class="bi bi-search"></i> Looking For
+                            {% endif %}
+                        </span>
+                        <small class="text-muted">
+                            <i class="bi bi-clock"></i> {{ post.created_at|timesince }} ago
+                        </small>
+                    </div>
+                    
+                    <h5 class="card-title">{{ post.title|truncatewords:8 }}</h5>
+                    <p class="card-text text-muted small">{{ post.description|truncatewords:15 }}</p>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-person-circle me-2"></i>
+                            <small>{{ post.user.profile.display_name|truncatewords:2 }}</small>
+                        </div>
+                        <a href="{% url 'posts:detail' post.pk %}" class="btn btn-sm btn-outline-primary">
+                            View <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                    <h5 class="mt-3">No posts yet</h5>
+                    <p class="text-muted">Be the first to create a post!</p>
+                    <a href="{% url 'posts:create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle-fill"></i> Create First Post
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Upcoming Sessions -->
+{% if upcoming_sessions %}
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="bi bi-calendar-check-fill text-success"></i> Upcoming Sessions
+        </h2>
+    </div>
+    
+    {% for session in upcoming_sessions %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <span class="badge bg-warning text-dark">
+                        <i class="bi bi-clock"></i> {{ session.status|title }}
+                    </span>
+                    <small class="text-muted">
+                        {{ session.scheduled_at|date:"M d" }}
+                    </small>
+                </div>
+                
+                <h6 class="card-title">{{ session.skill.name }}</h6>
+                <p class="card-text small text-muted mb-2">
+                    <i class="bi bi-person-fill"></i> 
+                    {% if session.seeker == user %}
+                        Learning from {{ session.helper.profile.display_name }}
+                    {% else %}
+                        Teaching {{ session.seeker.profile.display_name }}
+                    {% endif %}
+                </p>
+                <p class="card-text small">
+                    <i class="bi bi-clock-fill text-primary"></i> {{ session.duration }} min
+                    <br>
+                    <i class="bi bi-coin text-warning"></i> {{ session.credits_cost }} credits
+                </p>
+                
+                <a href="{% url 'exchanges:detail' session.pk %}" class="btn btn-sm btn-outline-success w-100 mt-2">
+                    <i class="bi bi-eye-fill"></i> View Details
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% else %}
+<!-- Anonymous User Landing Page -->
+
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <div class="card-body py-5 text-center">
+                <h1 class="display-3 fw-bold mb-4">
+                    <i class="bi bi-mortarboard-fill"></i> Exchange Platform
+                </h1>
+                <p class="lead mb-4">Share skills, earn credits, and build a collaborative learning community</p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{% url 'accounts:signup' %}" class="btn btn-light btn-lg px-5">
+                        <i class="bi bi-person-plus-fill"></i> Sign Up Free
+                    </a>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-lg px-5">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features -->
+<div class="row mb-5">
+    <div class="col-12 text-center mb-4">
+        <h2 class="fw-bold">How It Works</h2>
+        <p class="text-muted">Join our skill-sharing community in 3 simple steps</p>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center border-0 shadow">
+            <div class="card-body p-4">
+                <div class="mb-3">
+                    <i class="bi bi-person-plus-fill" style="font-size: 3.5rem; color: #667eea;"></i>
+                </div>
+                <h4 class="card-title">1. Create Account</h4>
+                <p class="card-text text-muted">Sign up with your university email and get 10 free credits to start</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center border-0 shadow">
+            <div class="card-body p-4">
+                <div class="mb-3">
+                    <i class="bi bi-award-fill" style="font-size: 3.5rem; color: #f093fb;"></i>
+                </div>
+                <h4 class="card-title">2. Share Skills</h4>
+                <p class="card-text text-muted">Offer your expertise or request help from talented community members</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 text-center border-0 shadow">
+            <div class="card-body p-4">
+                <div class="mb-3">
+                    <i class="bi bi-people-fill" style="font-size: 3.5rem; color: #4facfe;"></i>
+                </div>
+                <h4 class="card-title">3. Collaborate</h4>
+                <p class="card-text text-muted">Book sessions, transfer credits, and grow together as a community</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-0" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+            <div class="card-body py-4">
+                <div class="row text-center">
+                    <div class="col-md-3 col-6 mb-3 mb-md-0">
+                        <h2 class="fw-bold mb-1">1000+</h2>
+                        <p class="mb-0">Students</p>
+                    </div>
+                    <div class="col-md-3 col-6 mb-3 mb-md-0">
+                        <h2 class="fw-bold mb-1">50+</h2>
+                        <p class="mb-0">Skills</p>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <h2 class="fw-bold mb-1">500+</h2>
+                        <p class="mb-0">Sessions</p>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <h2 class="fw-bold mb-1">95%</h2>
+                        <p class="mb-0">Satisfaction</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-0 shadow">
+            <div class="card-body text-center py-5">
+                <h3 class="fw-bold mb-3">Ready to Start Learning?</h3>
+                <p class="text-muted mb-4">Join thousands of students sharing knowledge and building skills together</p>
+                <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-lg px-5">
+                    <i class="bi bi-rocket-takeoff-fill"></i> Get Started Now
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
+{% endblock %}
