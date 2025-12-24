@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Home | Exchange{% endblock %}
+
+{% block content %}
+<h1>Welcome to Exchange</h1>
+
+{% if request.user.is_authenticated %}
+    <p>Hello, {{ request.user.username }} 👋</p>
+    <p>Use the navigation above to access your wallet, transfer credits, or search skills.</p>
+{% else %}
+    <p>Welcome! Please <a href="{% url 'accounts:login' %}">log in</a> or
+        <a href="{% url 'accounts:signup' %}">sign up</a> to get started.</p>
+{% endif %}
+
+<h2>Latest Skills</h2>
+<ul>
+    {% for skill in skills %}
+        <li>
+            {{ skill.name }} – {{ skill.user.username }}
+        </li>
+    {% empty %}
+        <li>No skills yet.</li>
+    {% endfor %}
+</ul>
+
+<h2>Latest Profiles</h2>
+<ul>
+    {% for profile in profiles %}
+        <li>
+            {{ profile.display_name|default:profile.user.username }}
+        </li>
+    {% empty %}
+        <li>No profiles yet.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
