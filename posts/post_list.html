@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="padding: 20px;">
+    <h2>📢 Marketplace - Posts</h2>
+    <p>Find people offering help or requesting help</p>
+    
+    <div style="margin: 20px 0;">
+        <a href="{% url 'posts:create' %}" class="btn btn-primary">➕ Create Post</a>
+    </div>
+    
+    <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <form method="get" style="display: flex; gap: 10px;">
+            <input type="text" name="q" placeholder="Search posts..." value="{{ search_query }}" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+            <select name="kind" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <option value="">All Posts</option>
+                <option value="offer" {% if kind_filter == 'offer' %}selected{% endif %}>Offering Help</option>
+                <option value="want" {% if kind_filter == 'want' %}selected{% endif %}>Looking for Help</option>
+            </select>
+            <button type="submit" style="padding: 10px 20px; background: #5558af; color: white; border: none; border-radius: 5px; cursor: pointer;">Search</button>
+        </form>
+    </div>
+    
+    <div style="display: grid; gap: 15px;">
+        {% for post in posts %}
+        <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0;">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div style="flex: 1;">
+                    <h3 style="margin: 0 0 10px 0;">{{ post.title }}</h3>
+                    <p style="color: #666; margin: 5px 0;">
+                        <strong>{{ post.skill_name }}</strong> • 
+                        {% if post.kind == 'offer' %}
+                            <span style="color: #28a745;">🎓 Offering Help</span>
+                        {% else %}
+                            <span style="color: #007bff;">🙋 Looking for Help</span>
+                        {% endif %}
+                    </p>
+                    <p style="margin: 10px 0;">{{ post.description|truncatewords:30 }}</p>
+                    <p style="color: #888; font-size: 0.9em;">
+                        Posted by <strong>{{ post.user.profile.display_name|default:post.user.email }}</strong> • 
+                        {{ post.created_at|timesince }} ago • 
+                        {{ post.views }} views
+                    </p>
+                </div>
+                <div style="margin-left: 20px;">
+                    <a href="{% url 'posts:detail' post.pk %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                    {% if post.user == request.user %}
+                        <a href="{% url 'posts:delete' post.pk %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this post?')">Delete</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 40px; background: #f9f9f9; border-radius: 8px;">
+            <p style="color: #888; font-size: 1.1em;">No posts found. Be the first to create one!</p>
+            <a href="{% url 'posts:create' %}" class="btn btn-primary" style="margin-top: 10px;">Create Post</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
