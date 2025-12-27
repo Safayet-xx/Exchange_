@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Search Skills{% endblock %}
+{% block content %}
+  <h2>Search Skills</h2>
+
+  <form method="get">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search by title, description, or user" style="width:100%;padding:10px;">
+  </form>
+
+  {% if q and not skills %}
+    <p>No results found for “{{ q }}”.</p>
+  {% endif %}
+
+  <ul style="list-style:none;padding:0;margin-top:20px;">
+    {% for s in skills %}
+      <li style="border:1px solid #ddd;border-radius:8px;padding:10px;margin-bottom:10px;">
+        <strong>{{ s.title }}</strong>
+        {% if s.owner.profile %}
+          <div>by <a href="{% url 'public_profile' s.owner.profile.handle %}">@{{ s.owner.profile.handle }}</a></div>
+        {% endif %}
+        <div>{{ s.description|truncatewords:30 }}</div>
+        {% if s.category %}<small>Category: {{ s.category }}</small>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}
