@@ -1,0 +1,11 @@
+Django==5.1.4
+Pillow==11.0.0
+stytch==8.6.0
+python-dotenv==1.0.0
+psycopg2-binary==2.9.10
+
+# Optional but recommended for production
+gunicorn==21.2.0
+whitenoise==6.6.0
+# redis==5.0.1             # Caching
+# celery==5.3.4            # Async tasks
