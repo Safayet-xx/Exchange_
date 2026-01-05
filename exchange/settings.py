@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -80,24 +81,30 @@ WSGI_APPLICATION = "exchange.wsgi.application"
 
 # Database
 # Database
-# Supports both PostgreSQL (Docker) and SQLite (Development)
-import dj_database_url
+# Default: SQLite for local/dev. For Docker/production set DB_ENGINE=postgres (or provide DB_* vars).
+DB_ENGINE = os.getenv("DB_ENGINE", "").lower()
 
-DATABASE_URL = os.getenv('DATABASE_URL')
+USE_POSTGRES = DB_ENGINE in {"postgres", "postgresql"} or os.getenv("POSTGRES_DB") or os.getenv("DB_HOST")
 
-if DATABASE_URL:
-    # Use PostgreSQL in Docker
+if USE_POSTGRES:
     DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL)
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME", os.getenv("POSTGRES_DB", "exchange")),
+            "USER": os.getenv("DB_USER", os.getenv("POSTGRES_USER", "exchange")),
+            "PASSWORD": os.getenv("DB_PASSWORD", os.getenv("POSTGRES_PASSWORD", "exchange")),
+            "HOST": os.getenv("DB_HOST", "db"),
+            "PORT": os.getenv("DB_PORT", "5432"),
+        }
     }
 else:
-    # Use SQLite for local development
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -116,6 +123,9 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = []
+
+# WhiteNoise: serve static files directly from the app
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Media files (User uploads)
 MEDIA_URL = "/media/"
