@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    {% if post.kind == 'offer' %}
+                        <span class="badge bg-success">{{ post.get_kind_display }}</span>
+                    {% else %}
+                        <span class="badge bg-info">{{ post.get_kind_display }}</span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h2>{{ post.title }}</h2>
+                    <p><strong>Skill:</strong> {{ post.skill_name }}</p>
+                    <hr>
+                    <p>{{ post.description }}</p>
+                    <hr>
+                    
+                    <!-- Posted By Section -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h5>Posted by: {{ post.user.profile.display_name|default:post.user.email }}</h5>
+                            <p class="text-muted mb-2">
+                                <small>{{ post.views }} views | Posted {{ post.created_at|timesince }} ago</small>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="alert alert-info">
+                        <h6>📞 Contact Information</h6>
+                        <p class="mb-1">
+                            <strong>Email:</strong> 
+                            <a href="mailto:{{ post.user.email }}">{{ post.user.email }}</a>
+                        </p>
+                        {% if post.user.profile.phone_number %}
+                            <p class="mb-1">
+                                <strong>Phone:</strong> 
+                                <a href="tel:{{ post.user.profile.phone_number }}">{{ post.user.profile.phone_number }}</a>
+                            </p>
+                        {% endif %}
+                        <p class="mb-0">
+                            <strong>University:</strong> {{ post.user.profile.university|default:'Not specified' }}
+                        </p>
+                    </div>
+                    
+                    {% if post.user != user %}
+                        <div class="d-grid gap-2">
+                            {% if post.kind == 'offer' %}
+                                <a href="{% url 'exchanges:create' %}?helper={{ post.user.email }}" class="btn btn-success btn-lg">
+                                    💼 Request Session
+                                </a>
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <strong>ℹ️ Note:</strong> This user is looking for help, not offering it.
+                                    You cannot request a session from them.
+                                </div>
+                            {% endif %}
+                            <a href="{% url 'profiles:public_profile' post.user.profile.handle %}" class="btn btn-outline-primary">
+                                👤 View Full Profile
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mt-3">
+                <a href="{% url 'posts:list' %}" class="btn btn-secondary">← Back to Posts</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

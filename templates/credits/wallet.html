@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <!-- Wallet Balance -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">💰 Your Wallet</h3>
+                </div>
+                <div class="card-body text-center">
+                    <h1 class="display-3 text-primary">{{ wallet.balance }}</h1>
+                    <p class="text-muted">Credits Available</p>
+                </div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">📊 Transaction History</h4>
+                </div>
+                <div class="card-body">
+                    {% if transactions %}
+                        <div class="list-group">
+                            {% for t in transactions %}
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            {% if t.from_user == request.user %}
+                                                <!-- Sent Transaction -->
+                                                <span class="badge bg-danger">SENT</span>
+                                                <strong>To:</strong> {{ t.to_user.email }}
+                                            {% else %}
+                                                <!-- Received Transaction -->
+                                                <span class="badge bg-success">RECEIVED</span>
+                                                <strong>From:</strong> {{ t.from_user.email }}
+                                            {% endif %}
+                                            
+                                            {% if t.note %}
+                                                <br><small class="text-muted">{{ t.note }}</small>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-end">
+                                            {% if t.from_user == request.user %}
+                                                <h5 class="text-danger mb-0">-{{ t.amount }}</h5>
+                                            {% else %}
+                                                <h5 class="text-success mb-0">+{{ t.amount }}</h5>
+                                            {% endif %}
+                                            <small class="text-muted">{{ t.created_at|date:"M d, Y H:i" }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            <p class="mb-0">No transactions yet. Complete sessions to earn credits!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Back Button -->
+            <div class="mt-3">
+                <a href="{% url 'core:home' %}" class="btn btn-secondary">← Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

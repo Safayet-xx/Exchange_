@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}Create Session - Exchange Platform{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'exchanges:list' %}">My Sessions</a></li>
+            <li class="breadcrumb-item active">Create New Session</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">🆕 Create New Exchange Session</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="sessionForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="helper_email" class="form-label">Helper's Email *</label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="helper_email" 
+                                   name="helper_email" 
+                                   placeholder="helper@university.ac.uk"
+                                   value="{{ helper_email }}"
+                                   required>
+                            <small class="form-text text-muted">Enter the email of the person who will help you</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Session Title *</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="title" 
+                                   name="title" 
+                                   placeholder="e.g., Python Basics Help"
+                                   value="{{ title|default:pre_filled_title }}"
+                                   required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" 
+                                      id="description" 
+                                      name="description" 
+                                      rows="3"
+                                      placeholder="Describe what help you need...">{{ description }}</textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="duration" class="form-label">Duration *</label>
+                                    <select class="form-control" id="duration" name="duration" required onchange="calculateCredits()">
+                                        <option value="60" {% if duration == '60' %}selected{% endif %}>60 minutes</option>
+                                        <option value="90" {% if duration == '90' %}selected{% endif %}>90 minutes</option>
+                                        <option value="120" {% if duration == '120' %}selected{% endif %}>2 hours</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="level" class="form-label">Skill Level *</label>
+                                    <select class="form-control" id="level" name="level" required onchange="calculateCredits()">
+                                        <option value="beginner" {% if level == 'beginner' %}selected{% endif %}>Beginner</option>
+                                        <option value="intermediate" {% if level == 'intermediate' %}selected{% endif %}>Intermediate</option>
+                                        <option value="advanced" {% if level == 'advanced' %}selected{% endif %}>Advanced</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="scheduled_time" class="form-label">Schedule Session (Optional)</label>
+                            <input type="datetime-local" 
+                                   class="form-control" 
+                                   id="scheduled_time" 
+                                   name="scheduled_time"
+                                   value="{{ scheduled_time }}">
+                            <small class="form-text text-muted">Choose when you'd like the session to take place</small>
+                        </div>
+
+                        <div class="alert alert-success">
+                            <h5>💰 Credits Required: <span id="creditAmount">5</span></h5>
+                            <small class="text-muted">Based on duration and skill level selected above</small>
+                            <br>
+                            {% if user.wallet %}
+                                <small>You have <strong>{{ user.wallet.balance }} credits</strong> available.</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="alert alert-info">
+                            <strong>ℹ️ How it works:</strong>
+                            <ol class="mb-0">
+                                <li>You create this session request</li>
+                                <li>The helper receives a notification and can accept or decline</li>
+                                <li>After they help you, you mark the session as complete</li>
+                                <li>Credits are automatically transferred</li>
+                            </ol>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Create Session</button>
+                            <a href="{% url 'exchanges:list' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>💡 Suggested Helpers</h5>
+                </div>
+                <div class="card-body">
+                    {% if suggested_helpers %}
+                        <p class="small text-muted">Click to use email:</p>
+                        {% for helper in suggested_helpers %}
+                            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                                <div>
+                                    <small>
+                                        <strong>{{ helper.profile.display_name|default:helper.email }}</strong><br>
+                                        <span class="text-muted">{{ helper.email }}</span>
+                                    </small>
+                                </div>
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-primary"
+                                        onclick="document.getElementById('helper_email').value='{{ helper.email }}'">
+                                    Use
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted small">No suggestions available.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>📊 Credit Table</h5>
+                </div>
+                <div class="card-body">
+                    <small>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Duration</th>
+                                    <th>Beginner</th>
+                                    <th>Inter.</th>
+                                    <th>Adv.</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>60 min</td>
+                                    <td>5</td>
+                                    <td>7</td>
+                                    <td>9</td>
+                                </tr>
+                                <tr>
+                                    <td>90 min</td>
+                                    <td>7</td>
+                                    <td>9</td>
+                                    <td>12</td>
+                                </tr>
+                                <tr>
+                                    <td>2 hours</td>
+                                    <td>10</td>
+                                    <td>12</td>
+                                    <td>15</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Credit calculation table
+const CREDIT_TABLE = {
+    '60-beginner': 5,
+    '60-intermediate': 7,
+    '60-advanced': 9,
+    '90-beginner': 7,
+    '90-intermediate': 9,
+    '90-advanced': 12,
+    '120-beginner': 10,
+    '120-intermediate': 12,
+    '120-advanced': 15,
+};
+
+function calculateCredits() {
+    const duration = document.getElementById('duration').value;
+    const level = document.getElementById('level').value;
+    const key = duration + '-' + level;
+    const credits = CREDIT_TABLE[key] || 5;
+    document.getElementById('creditAmount').textContent = credits;
+}
+
+// Calculate on page load
+document.addEventListener('DOMContentLoaded', calculateCredits);
+</script>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="padding: 20px;">
+    <h2>🎯 My Skills</h2>
+    <p>Manage the skills displayed on your profile</p>
+    
+    <div style="margin: 20px 0;">
+        <a href="{% url 'skills:add' %}" class="btn btn-primary">➕ Add New Skill</a>
+    </div>
+    
+    <h3 style="margin-top: 30px;">Your Skills</h3>
+    {% if user_skills %}
+        <div style="display: grid; gap: 15px; margin-top: 15px;">
+            {% for user_skill in user_skills %}
+            <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h4 style="margin: 0 0 10px 0;">{{ user_skill.skill.name }}</h4>
+                    {% if user_skill.skill.category %}
+                        <p style="color: #666; margin: 5px 0;">
+                            <span style="background: #f0f0f0; padding: 3px 10px; border-radius: 15px; font-size: 0.9em;">
+                                {{ user_skill.skill.category.icon }} {{ user_skill.skill.category.name }}
+                            </span>
+                        </p>
+                    {% endif %}
+                    <p style="margin: 5px 0;">
+                        <strong>Level:</strong> {{ user_skill.get_proficiency_level_display }} • 
+                        <strong>Experience:</strong> {{ user_skill.years_of_experience }} years
+                    </p>
+                    {% if user_skill.description %}
+                        <p style="color: #555; margin-top: 10px;">{{ user_skill.description|truncatewords:20 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <a href="{% url 'skills:delete' user_skill.pk %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this skill from your profile?')">Remove</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 40px; background: #f9f9f9; border-radius: 8px; margin-top: 15px;">
+            <p style="color: #888; font-size: 1.1em;">You haven't added any skills yet.</p>
+            <p>Add skills to showcase your expertise on your profile!</p>
+            <a href="{% url 'skills:add' %}" class="btn btn-primary" style="margin-top: 10px;">Add Your First Skill</a>
+        </div>
+    {% endif %}
+    
+    <h3 style="margin-top: 40px;">Available Skills</h3>
+    <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-top: 15px;">
+        {% for category in categories %}
+            <h4>{{ category.icon }} {{ category.name }}</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                {% for skill in category.skills.all %}
+                    <span style="background: white; padding: 8px 15px; border-radius: 20px; border: 1px solid #ddd; font-size: 0.9em;">
+                        {{ skill.name }}
+                    </span>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

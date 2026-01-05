@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Session: {{ session.title }} - Exchange Platform{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'exchanges:list' %}">My Sessions</a></li>
+            <li class="breadcrumb-item active">Session #{{ session.pk }}</li>
+        </ol>
+    </nav>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3>{{ session.title }}</h3>
+                <span class="badge bg-{% if session.status == 'completed' %}success{% elif session.status == 'accepted' %}info{% elif session.status == 'pending' %}warning{% else %}secondary{% endif %} fs-6">
+                    {{ session.get_status_display }}
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>👤 Requester (Needs Help)</h5>
+                    <p class="mb-1"><strong>{{ session.requester.email }}</strong></p>
+                    {% if session.requester.profile %}
+                        <p class="text-muted">{{ session.requester.profile.display_name }} ({{ session.requester.profile.get_role_display }})</p>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <h5>🤝 Helper (Providing Help)</h5>
+                    <p class="mb-1"><strong>{{ session.helper.email }}</strong></p>
+                    {% if session.helper.profile %}
+                        <p class="text-muted">{{ session.helper.profile.display_name }} ({{ session.helper.profile.get_role_display }})</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h5>📝 Description</h5>
+                <p>{{ session.description|default:"No description provided." }}</p>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <h6>💰 Credits</h6>
+                    <p class="fs-4">{{ session.agreed_amount }}</p>
+                </div>
+                <div class="col-md-3">
+                    <h6>⏱️ Duration</h6>
+                    <p>{{ session.get_duration_display }}</p>
+                </div>
+                <div class="col-md-3">
+                    <h6>📊 Level</h6>
+                    <p>{{ session.get_level_display }}</p>
+                </div>
+                <div class="col-md-3">
+                    <h6>📅 Created</h6>
+                    <p>{{ session.created_at|date:"M d, Y" }}</p>
+                </div>
+            </div>
+
+            {% if session.scheduled_time %}
+            <div class="mb-4">
+                <h6>🕐 Scheduled Time</h6>
+                <p>{{ session.scheduled_time|date:"F d, Y - g:i A" }}</p>
+            </div>
+            {% endif %}
+
+            <div class="mb-4">
+                <h6>✅ Credits Transferred</h6>
+                <p>{% if session.credits_transferred %}Yes - Transaction completed{% else %}Not yet - Will transfer upon completion{% endif %}</p>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="border-top pt-3">
+                <h5 class="mb-3">Actions</h5>
+                
+                {% if user == session.helper and session.status == 'pending' %}
+                    <a href="{% url 'exchanges:accept' session.pk %}" class="btn btn-success">✓ Accept Session</a>
+                    <a href="{% url 'exchanges:cancel' session.pk %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to decline this session?')">✕ Decline Request</a>
+                {% endif %}
+
+                {% if user == session.requester and session.status == 'accepted' %}
+                    <a href="{% url 'exchanges:complete' session.pk %}" class="btn btn-primary">
+                        ✓ Mark as Complete &amp; Transfer Credits
+                    </a>
+                {% endif %}
+
+                {% if user == session.requester and session.status in 'pending,accepted' %}
+                    <a href="{% url 'exchanges:cancel' session.pk %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to cancel this session?')">✕ Cancel Session</a>
+                {% endif %}
+                
+                {% if user == session.helper and session.status == 'accepted' %}
+                    <a href="{% url 'exchanges:cancel' session.pk %}" class="btn btn-warning" onclick="return confirm('Are you sure you want to cancel this accepted session?')">⚠️ Cancel Session</a>
+                {% endif %}
+
+                {% if session.status == 'completed' %}
+                    <div class="alert alert-success">
+                        <strong>✓ Session Completed!</strong> Credits have been transferred.
+                        {% if session.credit_transactions.exists %}
+                            <p class="mb-0 mt-2"><small>Transaction ID: {{ session.credit_transactions.first.pk }}</small></p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                {% if session.status == 'cancelled' %}
+                    <div class="alert alert-secondary">
+                        <strong>Session was cancelled.</strong>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{% url 'exchanges:list' %}" class="btn btn-outline-secondary">← Back to My Sessions</a>
+    </div>
+</div>
+{% endblock %}

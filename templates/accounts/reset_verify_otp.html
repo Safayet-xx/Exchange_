@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Code - Exchange Platform{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">📧 Verify Code</h2>
+                    <p class="text-center text-muted mb-4">
+                        Enter the 6-digit code sent to<br>
+                        <strong>{{ email }}</strong>
+                    </p>
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="code" class="form-label">Verification Code</label>
+                            <input type="text" 
+                                   class="form-control form-control-lg text-center" 
+                                   id="code" 
+                                   name="code" 
+                                   placeholder="000000"
+                                   maxlength="6"
+                                   pattern="[0-9]{6}"
+                                   required
+                                   autofocus
+                                   style="letter-spacing: 0.5em; font-size: 1.5rem;">
+                            <small class="form-text text-muted">
+                                Check your email for the code
+                            </small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                            Verify Code
+                        </button>
+                        
+                        <div class="text-center">
+                            <p class="mb-0">Didn't receive code?</p>
+                            <a href="{% url 'accounts:forgot_password' %}" class="btn btn-link">
+                                Request New Code
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

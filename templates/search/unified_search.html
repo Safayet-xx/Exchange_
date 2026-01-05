@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+
+{% block title %}Search - Exchange Platform{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="bi bi-search"></i> Search Exchange Platform
+        </h1>
+    </div>
+</div>
+
+<!-- Search Form -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <form method="get" action="">
+                    <div class="row g-3">
+                        <!-- Search Type Dropdown -->
+                        <div class="col-md-3">
+                            <label for="type" class="form-label fw-bold">Search For:</label>
+                            <select name="type" id="type" class="form-select form-select-lg">
+                                <option value="posts" {% if search_type == 'posts' %}selected{% endif %}>
+                                    📝 Posts
+                                </option>
+                                <option value="users" {% if search_type == 'users' %}selected{% endif %}>
+                                    👥 Users
+                                </option>
+                                <option value="skills" {% if search_type == 'skills' %}selected{% endif %}>
+                                    🎓 Skills
+                                </option>
+                            </select>
+                        </div>
+                        
+                        <!-- Search Query -->
+                        <div class="col-md-5">
+                            <label for="q" class="form-label fw-bold">Search Term:</label>
+                            <input 
+                                type="text" 
+                                name="q" 
+                                id="q" 
+                                class="form-control form-control-lg" 
+                                placeholder="Enter keyword..."
+                                value="{{ query }}"
+                                autofocus
+                                required
+                            >
+                        </div>
+                        
+                        <!-- Department Filter -->
+                        <div class="col-md-3">
+                            <label for="department" class="form-label fw-bold">Department:</label>
+                            <select name="department" id="department" class="form-select form-select-lg">
+                                <option value="">All Departments</option>
+                                {% for dept_value, dept_name in departments %}
+                                    <option value="{{ dept_value }}" {% if department == dept_value %}selected{% endif %}>
+                                        {{ dept_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Search Button -->
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Results -->
+{% if query %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>
+                {% if search_type == 'posts' %}
+                    <i class="bi bi-grid-3x3-gap-fill text-primary"></i> Posts
+                {% elif search_type == 'users' %}
+                    <i class="bi bi-people-fill text-success"></i> Users
+                {% else %}
+                    <i class="bi bi-award-fill text-warning"></i> Skills
+                {% endif %}
+                - {{ result_count }} result{{ result_count|pluralize }}
+            </h4>
+            {% if department %}
+                <span class="badge bg-info">
+                    <i class="bi bi-building"></i> {{ department_name }}
+                </span>
+            {% endif %}
+        </div>
+        
+        {% if results %}
+            {% if search_type == 'posts' %}
+                <!-- POST RESULTS -->
+                <div class="row">
+                    {% for post in results %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card shadow-sm hover-card h-100">
+                            <div class="card-body">
+                                <!-- Post Header -->
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <span class="badge {% if post.post_type == 'offer' %}bg-success{% else %}bg-primary{% endif %}">
+                                        {% if post.post_type == 'offer' %}
+                                            <i class="bi bi-gift-fill"></i> Offering
+                                        {% else %}
+                                            <i class="bi bi-search"></i> Looking For
+                                        {% endif %}
+                                    </span>
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock"></i> {{ post.created_at|timesince }} ago
+                                    </small>
+                                </div>
+                                
+                                <!-- Post Content -->
+                                <h5 class="card-title mb-2">{{ post.title }}</h5>
+                                <p class="card-text text-muted small mb-3">{{ post.description|truncatewords:20 }}</p>
+                                
+                                <!-- Post Author -->
+                                <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                        {{ post.user.profile.display_name.0|upper|default:'?' }}
+                                    </div>
+                                    <div class="ms-2">
+                                        <strong class="d-block">{{ post.user.profile.display_name|default:post.user.email }}</strong>
+                                        <small class="text-muted">@{{ post.user.profile.handle }}</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Actions -->
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'posts:detail' post.pk %}" class="btn btn-sm btn-outline-primary flex-fill">
+                                        <i class="bi bi-eye"></i> View Details
+                                    </a>
+                                    {% if post.user != user %}
+                                        <a href="{% url 'profiles:public_profile' post.user.profile.handle %}" class="btn btn-sm btn-outline-success flex-fill">
+                                            <i class="bi bi-person"></i> View Profile
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+            {% elif search_type == 'users' %}
+                <!-- USER RESULTS -->
+                <div class="row">
+                    {% for result_user in results %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 shadow-sm hover-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: bold;">
+                                        {{ result_user.profile.display_name.0|upper|default:'?' }}
+                                    </div>
+                                    <div class="ms-3">
+                                        <h5 class="mb-0">{{ result_user.profile.display_name|default:result_user.email }}</h5>
+                                        <small class="text-muted">@{{ result_user.profile.handle }}</small>
+                                    </div>
+                                </div>
+                                
+                                <p class="small text-muted mb-2">
+                                    <i class="bi bi-building"></i> {{ result_user.profile.university|default:'Not specified' }}
+                                </p>
+                                
+                                {% if result_user.profile.bio %}
+                                    <p class="small mb-3">{{ result_user.profile.bio|truncatewords:15 }}</p>
+                                {% endif %}
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-primary">{{ result_user.user_skills.count }} skill{{ result_user.user_skills.count|pluralize }}</span>
+                                    <a href="{% url 'profiles:public_profile' result_user.profile.handle %}" class="btn btn-sm btn-outline-primary">
+                                        View Profile <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+            {% else %}
+                <!-- SKILL RESULTS -->
+                <div class="row">
+                    {% for user_skill in results %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card shadow-sm hover-card">
+                            <div class="card-body">
+                                <!-- Skill Header -->
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h5 class="mb-1">
+                                            <i class="bi bi-award-fill text-warning"></i>
+                                            {{ user_skill.skill.name }}
+                                        </h5>
+                                        <small class="text-muted">
+                                            {{ user_skill.get_department_display }}
+                                        </small>
+                                    </div>
+                                    <span class="badge bg-info">{{ user_skill.get_proficiency_level_display }}</span>
+                                </div>
+                                
+                                <!-- Skill Owner -->
+                                <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                        {{ user_skill.user.profile.display_name.0|upper|default:'?' }}
+                                    </div>
+                                    <div class="ms-2">
+                                        <strong class="d-block">{{ user_skill.user.profile.display_name }}</strong>
+                                        <small class="text-muted">{{ user_skill.years_of_experience }} years experience</small>
+                                    </div>
+                                </div>
+                                
+                                <!-- Description -->
+                                {% if user_skill.description %}
+                                    <p class="small text-muted mb-3">{{ user_skill.description|truncatewords:20 }}</p>
+                                {% endif %}
+                                
+                                <!-- Actions -->
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'profiles:public_profile' user_skill.user.profile.handle %}" class="btn btn-sm btn-outline-primary flex-fill">
+                                        <i class="bi bi-person"></i> View Profile
+                                    </a>
+                                    {% if user_skill.user != user %}
+                                        <a href="/exchanges/create/?helper={{ user_skill.user.id }}&skill={{ user_skill.skill.id }}" class="btn btn-sm btn-success flex-fill">
+                                            <i class="bi bi-calendar-plus"></i> Request Session
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+        {% else %}
+            <!-- No Results -->
+            <div class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                    <h4 class="mt-3">No results found</h4>
+                    <p class="text-muted">Try different keywords or change the search type</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<!-- Search Prompt -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm border-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-search" style="font-size: 4rem;"></i>
+                <h3 class="mt-3">Start Your Search</h3>
+                <p class="lead">Search for posts, users, or skills across all departments</p>
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card bg-white text-dark">
+                            <div class="card-body">
+                                <i class="bi bi-grid-3x3-gap-fill" style="font-size: 2.5rem; color: #667eea;"></i>
+                                <h5 class="mt-2">Search Posts</h5>
+                                <p class="small">Find offers and requests in the marketplace</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-white text-dark">
+                            <div class="card-body">
+                                <i class="bi bi-people-fill" style="font-size: 2.5rem; color: #4facfe;"></i>
+                                <h5 class="mt-2">Search Users</h5>
+                                <p class="small">Find students and professors by name or email</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-white text-dark">
+                            <div class="card-body">
+                                <i class="bi bi-award-fill" style="font-size: 2.5rem; color: #f093fb;"></i>
+                                <h5 class="mt-2">Search Skills</h5>
+                                <p class="small">Discover expertise and request sessions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+    .hover-card {
+        transition: all 0.3s ease;
+    }
+    
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    }
+    
+    .form-select-lg, .form-control-lg {
+        font-size: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+        .col-md-1 {
+            margin-top: 1rem;
+        }
+    }
+</style>
+{% endblock %}

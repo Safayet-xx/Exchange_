@@ -1,26 +1,40 @@
 {% extends "base.html" %}
-{% block title %}Search Skills{% endblock %}
+{% block title %}Search skills{% endblock %}
+
 {% block content %}
-  <h2>Search Skills</h2>
+<h1>Search skills</h1>
 
-  <form method="get">
-    <input type="text" name="q" value="{{ q }}" placeholder="Search by title, description, or user" style="width:100%;padding:10px;">
-  </form>
+<form method="get" style="margin-bottom: 1rem;">
+  <input type="text" name="q" value="{{ q }}" placeholder="Search by skill, title, or user"
+         style="width:100%;padding:10px;">
+</form>
 
-  {% if q and not skills %}
-    <p>No results found for “{{ q }}”.</p>
-  {% endif %}
+{% if q and not skills %}
+  <p>No results found for “{{ q }}”.</p>
+{% endif %}
 
-  <ul style="list-style:none;padding:0;margin-top:20px;">
-    {% for s in skills %}
-      <li style="border:1px solid #ddd;border-radius:8px;padding:10px;margin-bottom:10px;">
-        <strong>{{ s.title }}</strong>
-        {% if s.owner.profile %}
-          <div>by <a href="{% url 'public_profile' s.owner.profile.handle %}">@{{ s.owner.profile.handle }}</a></div>
-        {% endif %}
-        <div>{{ s.description|truncatewords:30 }}</div>
-        {% if s.category %}<small>Category: {{ s.category }}</small>{% endif %}
-      </li>
-    {% endfor %}
-  </ul>
+<ul style="list-style:none;padding:0;margin-top:20px;">
+  {% for s in skills %}
+    <li style="border:1px solid #ddd;border-radius:8px;padding:10px;margin-bottom:10px;">
+      <strong>{{ s.title }}</strong>
+      <div>
+        Type:
+        {% if s.kind == "offer" %}Offering{% else %}Looking for{% endif %}
+      </div>
+      <div>
+        Skills:
+        {% for tag in s.skills.all %}
+          <span style="display:inline-block;border:1px solid #ccc;border-radius:12px;padding:2px 8px;margin:2px;">
+            {{ tag.name }}
+          </span>
+        {% endfor %}
+      </div>
+      <div>
+        By {{ s.user.email }}
+      </div>
+      <div>{{ s.description|default:"No description" }}</div>
+      <small>Posted on {{ s.created_at|date:"Y-m-d H:i" }}</small>
+    </li>
+  {% endfor %}
+</ul>
 {% endblock %}

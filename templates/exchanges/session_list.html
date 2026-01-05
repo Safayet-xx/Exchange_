@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}My Sessions - Exchange Platform{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>💼 My Exchange Sessions</h2>
+        <a href="{% url 'exchanges:create' %}" class="btn btn-primary">+ Create New Session</a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <!-- Sessions I Requested -->
+        <div class="col-md-6">
+            <h4 class="mb-3">🙋 Sessions I Requested Help</h4>
+            {% if requested_sessions %}
+                {% for session in requested_sessions %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ session.title }}</h5>
+                            <p class="card-text text-muted small">Helper: {{ session.helper.email }}</p>
+                            <p class="card-text">{{ session.description|truncatewords:20 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-{% if session.status == 'completed' %}success{% elif session.status == 'accepted' %}info{% elif session.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                                    {{ session.get_status_display }}
+                                </span>
+                                <span class="text-muted">💰 {{ session.agreed_amount }} credits</span>
+                            </div>
+                            <div class="mt-2">
+                                <a href="{% url 'exchanges:detail' session.pk %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">
+                    You haven't requested any help sessions yet. <a href="{% url 'exchanges:create' %}">Create one now!</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sessions Where I'm Helping -->
+        <div class="col-md-6">
+            <h4 class="mb-3">🤝 Sessions Where I'm Helping</h4>
+            {% if helping_sessions %}
+                {% for session in helping_sessions %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ session.title }}</h5>
+                            <p class="card-text text-muted small">Requested by: {{ session.requester.email }}</p>
+                            <p class="card-text">{{ session.description|truncatewords:20 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-{% if session.status == 'completed' %}success{% elif session.status == 'accepted' %}info{% elif session.status == 'pending' %}warning{% else %}secondary{% endif %}">
+                                    {{ session.get_status_display }}
+                                </span>
+                                <span class="text-muted">💰 {{ session.agreed_amount }} credits</span>
+                            </div>
+                            <div class="mt-2">
+                                <a href="{% url 'exchanges:detail' session.pk %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                                {% if session.status == 'pending' %}
+                                    <a href="{% url 'exchanges:accept' session.pk %}" class="btn btn-sm btn-success">Accept</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info">
+                    No one has requested your help yet. Make sure to add your skills in <a href="{% url 'skills:my_skills' %}">your skills profile</a>!
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

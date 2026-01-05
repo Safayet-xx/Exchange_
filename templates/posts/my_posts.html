@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h2>My Posts</h2>
+    <a href="{% url 'posts:create' %}" class="btn btn-success mb-3">Create New Post</a>
+    
+    {% if posts %}
+        {% for post in posts %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    {% if post.kind == 'offer' %}
+                        <span class="badge bg-success">{{ post.get_kind_display }}</span>
+                    {% else %}
+                        <span class="badge bg-info">{{ post.get_kind_display }}</span>
+                    {% endif %}
+                    <h5>{{ post.title }}</h5>
+                    <p>Skill: {{ post.skill_name }}</p>
+                    <p>{{ post.description }}</p>
+                    <small>{{ post.views }} views | Posted {{ post.created_at|timesince }} ago</small>
+                    <div class="mt-2">
+                        <a href="{% url 'posts:detail' post.pk %}" class="btn btn-sm btn-primary">View</a>
+                        <a href="{% url 'posts:delete' post.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info">You haven't created any posts yet.</div>
+    {% endif %}
+</div>
+{% endblock %}

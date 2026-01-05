@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}My Skills{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1>🎯 My Skills</h1>
+                    <p class="lead">Manage your expertise and skills</p>
+                </div>
+                <div>
+                    <a href="{% url 'skills:add' %}" class="btn btn-success">+ Add New Skill</a>
+                    <a href="{% url 'skills:browse' %}" class="btn btn-outline-primary">Browse All Skills</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User's Skills -->
+    <div class="row">
+        {% if user_skills %}
+            {% for user_skill in user_skills %}
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="card-title">{{ user_skill.skill.name }}</h5>
+                                    {% if user_skill.skill.category %}
+                                        <small class="text-muted">
+                                            {{ user_skill.skill.category.icon }} {{ user_skill.skill.category.name }}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                                <span class="badge bg-primary">{{ user_skill.get_proficiency_level_display }}</span>
+                            </div>
+                            
+                            <hr>
+                            
+                            <p class="mb-2">
+                                <strong>Experience:</strong> {{ user_skill.years_of_experience }} years
+                            </p>
+                            
+                            {% if user_skill.description %}
+                                <p class="text-muted small">{{ user_skill.description }}</p>
+                            {% endif %}
+                            
+                            <div class="d-flex gap-2 mt-3">
+                                <a href="{% url 'skills:edit' user_skill.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+                                <a href="{% url 'skills:delete' user_skill.pk %}" class="btn btn-sm btn-outline-danger">Remove</a>
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted">
+                            <small>Added {{ user_skill.created_at|date:"M d, Y" }}</small>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <h4>No skills added yet</h4>
+                    <p>Add skills to showcase your expertise on your profile!</p>
+                    <a href="{% url 'skills:add' %}" class="btn btn-primary">Add Your First Skill</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

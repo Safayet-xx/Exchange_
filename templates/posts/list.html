@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Posts - Marketplace{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1>📢 Post Marketplace</h1>
+            <p class="lead">Offer help or request assistance</p>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <form method="get" class="d-flex gap-2">
+                <input type="text" name="q" class="form-control" placeholder="Search posts..." value="{{ query }}">
+                <select name="kind" class="form-select" style="max-width: 200px;">
+                    <option value="">All Types</option>
+                    <option value="offer" {% if kind_filter == 'offer' %}selected{% endif %}>Offering Help</option>
+                    <option value="want" {% if kind_filter == 'want' %}selected{% endif %}>Need Help</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'posts:create' %}" class="btn btn-success">+ Create Post</a>
+            <a href="{% url 'posts:my_posts' %}" class="btn btn-outline-primary">My Posts</a>
+        </div>
+    </div>
+
+    <!-- Posts List -->
+    <div class="row">
+        {% for post in posts %}
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-{% if post.kind == 'offer' %}success{% else %}info{% endif %}">
+                                {{ post.get_kind_display }}
+                            </span>
+                            <small class="text-muted">{{ post.views }} views</small>
+                        </div>
+                        <h5 class="card-title">{{ post.title }}</h5>
+                        <p class="card-text">
+                            <strong>Skill:</strong> {{ post.skill_name }}<br>
+                            <small class="text-muted">{{ post.description|truncatewords:20 }}</small>
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                By {{ post.user.profile.display_name|default:post.user.email }}
+                            </small>
+                            <a href="{% url 'posts:detail' post.pk %}" class="btn btn-sm btn-primary">View</a>
+                        </div>
+                    </div>
+                    <div class="card-footer text-muted">
+                        <small>Posted {{ post.created_at|timesince }} ago</small>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <p class="mb-0">No posts found. Be the first to create one!</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="padding: 20px; max-width: 800px; margin: 0 auto;">
+    <div style="background: white; padding: 30px; border-radius: 8px; border: 1px solid #e0e0e0;">
+        <div style="margin-bottom: 20px;">
+            {% if post.kind == 'offer' %}
+                <span style="background: #28a745; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.9em;">🎓 Offering Help</span>
+            {% else %}
+                <span style="background: #007bff; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.9em;">🙋 Looking for Help</span>
+            {% endif %}
+        </div>
+        
+        <h2>{{ post.title }}</h2>
+        
+        <p style="color: #666; margin: 10px 0;">
+            <strong>Skill:</strong> {{ post.skill_name }}
+        </p>
+        
+        <div style="background: #f9f9f9; padding: 20px; border-radius: 5px; margin: 20px 0;">
+            <p style="white-space: pre-wrap; margin: 0;">{{ post.description }}</p>
+        </div>
+        
+        <div style="border-top: 1px solid #e0e0e0; padding-top: 20px; margin-top: 20px;">
+            <h4>Posted by</h4>
+            <p>
+                <strong>{{ post.user.profile.display_name|default:post.user.email }}</strong><br>
+                {{ post.user.profile.get_role_display }}<br>
+                {% if post.user.profile.university %}{{ post.user.profile.university }}{% endif %}
+            </p>
+            <a href="{% url 'profiles:public_profile' post.user.profile.handle %}" class="btn btn-outline-primary">View Profile</a>
+            {% if post.kind == 'offer' %}
+                <a href="{% url 'exchanges:create' %}?helper={{ post.user.email }}" class="btn btn-success">Request Session</a>
+            {% endif %}
+        </div>
+        
+        <div style="color: #888; font-size: 0.9em; margin-top: 20px;">
+            Posted {{ post.created_at|timesince }} ago • {{ post.views }} views
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <a href="{% url 'posts:list' %}" class="btn btn-secondary">← Back to Posts</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
