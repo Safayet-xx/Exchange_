@@ -13,9 +13,16 @@ services:
   web:
     build: .
     environment:
-      # Django / settings
-      DEBUG: "0"
+      # Django / settings (safe defaults for local Docker run)
+      DEBUG: "1"
       DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1"
+
+      # Prevent HTTP -> HTTPS redirect in Docker
+      SECURE_SSL_REDIRECT: "0"
+      SESSION_COOKIE_SECURE: "0"
+      CSRF_COOKIE_SECURE: "0"
+      USE_X_FORWARDED_HOST: "0"
+      USE_SECURE_PROXY_SSL_HEADER: "0"
 
       # Database (Docker Postgres)
       DB_ENGINE: "postgres"
