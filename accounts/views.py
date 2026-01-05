@@ -10,9 +10,22 @@ from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 import os
+import random  # ✅ added
 
 from .models import User, OTP
 from .forms import SignUpForm
+
+
+# ✅ added (needed by unit tests)
+def generate_otp_code():
+    """Return a 6-digit numeric OTP as a string (used by unit tests)."""
+    return f"{random.randint(100000, 999999)}"
+
+
+# ✅ added (needed by unit tests)
+def is_otp_expired(created_at, expiry_minutes=10):
+    """Return True if created_at is older than expiry_minutes (used by unit tests)."""
+    return timezone.now() > created_at + timedelta(minutes=expiry_minutes)
 
 
 def signup_view(request):
