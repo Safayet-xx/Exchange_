@@ -1,42 +1,36 @@
+version: "3.9"
+
 services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: exchange
-      POSTGRES_USER: exchange
-      POSTGRES_PASSWORD: exchange
+      POSTGRES_DB: ${POSTGRES_DB:-${DB_NAME:-exchange}}
+      POSTGRES_USER: ${POSTGRES_USER:-${DB_USER:-exchange}}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-${DB_PASSWORD:-exchange}}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"
 
   web:
     build: .
+    env_file:
+      - .env
     environment:
-      # Django / settings (safe defaults for local Docker run)
-      DEBUG: "1"
-      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1"
-
-      # Prevent HTTP -> HTTPS redirect in Docker
-      SECURE_SSL_REDIRECT: "0"
-      SESSION_COOKIE_SECURE: "0"
-      CSRF_COOKIE_SECURE: "0"
-      USE_X_FORWARDED_HOST: "0"
-      USE_SECURE_PROXY_SSL_HEADER: "0"
-
-      # Database (Docker Postgres)
-      DB_ENGINE: "postgres"
-      DB_NAME: "exchange"
-      DB_USER: "exchange"
-      DB_PASSWORD: "exchange"
-      DB_HOST: "db"
-      DB_PORT: "5432"
+      # Make sure Django uses Postgres in Docker
+      DB_ENGINE: ${DB_ENGINE:-postgres}
+      DB_NAME: ${DB_NAME:-exchange}
+      DB_USER: ${DB_USER:-exchange}
+      DB_PASSWORD: ${DB_PASSWORD:-exchange}
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-5432}
 
       # Gunicorn
-      GUNICORN: "1"
-      WEB_CONCURRENCY: "3"
-      GUNICORN_TIMEOUT: "120"
+      GUNICORN: ${GUNICORN:-1}
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-3}
+      GUNICORN_TIMEOUT: ${GUNICORN_TIMEOUT:-120}
     volumes:
+      # Keep uploads persistent
       - media_data:/app/media
     ports:
       - "8000:8000"
