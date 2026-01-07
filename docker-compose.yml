@@ -1,7 +1,5 @@
-
-
-version: "3.9"
 name: exchange
+
 services:
   db:
     image: postgres:16-alpine
@@ -11,6 +9,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-${DB_PASSWORD:-exchange}}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    # Do NOT expose Postgres to host to avoid port conflicts (5432)
     # ports:
     #   - "5432:5432"
 
