@@ -1,19 +1,16 @@
-Exchange Platform (Docker)
 
-Quick start:
+) Clone repo
+git clone https://github.com/Safayet-xx/Exchange_.git
+cd Exchange_
 
+2) Create .env from example (Windows CMD)
+copy .env.docker.example .env
 
+3) Build + run
+docker compose up -d --build
 
-
-One-Click Run
-
-We provide run.bat so you can run the whole project with one click:
-
-Open the project folder
-
-- Windows: double-click run.bat
-- Mac/Linux: ./run.sh
-
+4) Run migrations
+docker compose exec web python manage.py migrate
 
 The application is deployed and accessible at:
 
