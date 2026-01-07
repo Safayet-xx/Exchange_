@@ -148,12 +148,17 @@ def create_session_view(request):
     helper_email = ''
     title = ''
     
-    # Pre-fill helper email if helper_id provided
+    # Pre-fill helper email if helper provided
+    # We support either a numeric user id (helper=12) or an email (helper=user@surrey.ac.uk)
     if helper_id:
         try:
-            helper_user = User.objects.get(id=helper_id)
+            if str(helper_id).isdigit():
+                helper_user = User.objects.get(id=int(helper_id))
+            else:
+                helper_user = User.objects.get(email__iexact=str(helper_id).strip())
             helper_email = helper_user.email
         except User.DoesNotExist:
+            # If an invalid helper is provided, just render the page without prefilling.
             pass
     
     # Pre-fill title if skill_id provided
